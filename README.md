@@ -13,6 +13,9 @@ This repository contains implementations of two algorithms for finding dense k-c
 ## Webpage Link
 https://sudo12-3.github.io/DAA_Assignment2/
 
+## Dataset Link
+https://drive.google.com/drive/folders/1kgygeY8Gf_BdNQLavvt84zWoqMzRVy5z?usp=drive_link
+
 ## Algorithms
 
 ### Algorithm 1 (Exact)
