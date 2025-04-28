@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dense Subgraph Algorithm Comparison</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            margin-top: 1.5em;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-links li {
+            margin-left: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: #34495e;
+        }
+        
+        /* Sections */
+        .section {
+            margin: 30px 0;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Dataset Results */
+        .dataset-container {
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        .dataset-title {
+            background-color: #34495e;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .algorithm-container {
+            margin-bottom: 30px;
+        }
+        
+        .algorithm-title {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+        
+        .algorithm-results {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .result-card {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #eee;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        /* Comparison Section */
+        .comparison-charts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: space-between;
+        }
+        
+        .chart-container {
+            flex: 1;
+            min-width: 350px;
+            background-color: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Improved Bar Chart */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .dataset-group {
+            margin-bottom: 30px;
+        }
+        
+        .dataset-chart-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #eee;
+            color: #2c3e50;
+        }
+        
+        .bar-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .bar-label {
+            width: 130px;
+            text-align: right;
+            padding-right: 15px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .bar-container {
+            flex-grow: 1;
+            height: 35px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            transition: width 1s ease-out;
+            position: relative;
+        }
+        
+        .bar-value {
+            position: absolute;
+            right: 15px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .bar-algo1 {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        .bar-algo4 {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 25px 0;
+            margin-top: 60px;
+        }
+        
+        /* Utilities */
+        .text-center {
+            text-align: center;
+        }
+        
+        .highlight {
+            background-color: #fffde7;
+            padding: 12px 18px;
+            border-radius: 6px;
+            border-left: 4px solid #f1c40f;
+            margin: 20px 0;
+        }
+        
+        .algo-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .algo1-tag {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #2980b9;
+        }
+        
+        .algo4-tag {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+        }
+        
+        .time-improvement {
+            font-weight: bold;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Dense Subgraph Analysis</div>
+            <ul class="nav-links">
+                <li><a href="#intro">Introduction</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#comparison">Comparison</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Introduction Section -->
+    <div class="container">
+        <section id="intro" class="section">
+            <h1 class="text-center">Dense Subgraph Algorithm Comparison</h1>
+            <p>This website presents the results of two algorithms for finding dense subgraphs in network datasets:</p>
+            <ul>
+                <li><strong>Algorithm-1 (Exact)</strong>: An exact algorithm for finding the densest k-clique subgraph.</li>
+                <li><strong>Algorithm-4 (CoreExact)</strong>: An optimized approach for finding dense subgraphs containing many k-cliques.</li>
+            </ul>
+            <p>The algorithms were tested on three network datasets: AS-733, Netscience, and CA-HepTh. The results showcase the performance and quality of the solutions found by each algorithm.</p>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results" class="section">
+            <h2 class="text-center">Algorithm Results by Dataset</h2>
+
+            <!-- Algorithm-1 Section -->
+            <div class="algorithm-container">
+                <h3 class="algorithm-title">Algorithm-1 (Exact) Results</h3>
+                
+                <!-- AS-733 Dataset for Algorithm-1 -->
+                <div class="dataset-container">
+                    <h3 class="dataset-title">AS-733 Dataset</h3>
+                    <p><em>Network with 1477 vertices and 6528 edges</em></p>
+
+                    <div class="algorithm-results">
+                        <!-- k=2 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=2 Results</div>
+                            <ul>
+                                <li>Cliques of size 2: 3142</li>
+                                <li>Vertices in densest subgraph: 30</li>
+                                <li>Total edges: 496</li>
+                                <li>Density: 1.14023</li>
+                                <li>Number of k-cliques: 244</li>
+                                <li>Average k-cliques per vertex: 8.13333</li>
+                                <li>Execution time: 6014 milliseconds</li>
+                            </ul>
+                        </div>
+
+                        <!-- k=3 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=3 Results</div>
+                            <ul>
+                                <li>Cliques of size 3: 2530</li>
+                                <li>Vertices in densest subgraph: 29</li>
+                                <li>Total edges: 477</li>
+                                <li>Density: 1.17488</li>
+                                <li>Number of k-cliques: 904</li>
+                                <li>Average k-cliques per vertex: 31.1724</li>
+                                <li>Execution time: 14096 milliseconds</li>
+                            </ul>
+                        </div>
+
+                        <!-- k=4 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=4 Results</div>
+                            <ul>
+                                <li>Cliques of size 4: 3025</li>
+                                <li>Vertices in densest subgraph: 29</li>
+                                <li>Total edges: 477</li>
+                                <li>Density: 1.17488</li>
+                                <li>Number of k-cliques: 1980</li>
+                                <li>Average k-cliques per vertex: 68.2759</li>
+                                <li>Execution time: 18661 milliseconds</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Netscience Dataset for Algorithm-1 -->
+                <div class="dataset-container">
+                    <h3 class="dataset-title">Netscience Dataset</h3>
+                    <p><em>Network with 1461 vertices and 2742 edges</em></p>
+
+                    <div class="algorithm-results">
+                        <!-- k=2 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=2 Results</div>
+                            <ul>
+                                <li>Cliques of size 2: 2742</li>
+                                <li>Vertices in densest subgraph: 20</li>
+                                <li>Total edges: 190</li>
+                                <li>Density: 1</li>
+                                <li>Number of k-cliques: 190</li>
+                                <li>Average k-cliques per vertex: 9.5</li>
+                                <li>Execution time: 4671 milliseconds</li>
+                            </ul>
+                        </div>
+
+                        <!-- k=3 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=3 Results</div>
+                            <ul>
+                                <li>Cliques of size 3: 3764</li>
+                                <li>Vertices in densest subgraph: 20</li>
+                                <li>Total edges: 190</li>
+                                <li>Density: 1</li>
+                                <li>Number of k-cliques: 1140</li>
+                                <li>Average k-cliques per vertex: 57</li>
+                                <li>Execution time: 9695 milliseconds</li>
+                            </ul>
+                        </div>
+
+                        <!-- k=4 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=4 Results</div>
+                            <ul>
+                                <li>Cliques of size 4: 7159</li>
+                                <li>Vertices in densest subgraph: 20</li>
+                                <li>Total edges: 190</li>
+                                <li>Density: 1</li>
+                                <li>Number of k-cliques: 4845</li>
+                                <li>Average k-cliques per vertex: 242.25</li>
+                                <li>Execution time: 15726 milliseconds</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CA-HepTh Dataset for Algorithm-1 -->
+                <div class="dataset-container">
+                    <h3 class="dataset-title">CA-HepTh Dataset</h3>
+                    <p><em>Network with 9877 vertices and 51971 edges</em></p>
+
+                    <div class="algorithm-results">
+                        <!-- k=2 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=2 Results</div>
+                            <ul>
+                                <li>Vertices in densest subgraph: 32</li>
+                                <li>Number of edges: 992</li>
+                                <li>Number of k-cliques: 496</li>
+                                <li>Execution time: 1,964,338 milliseconds</li>
+                            </ul>
+                        </div>
+
+                        <!-- k=3 results -->
+                        <div class="result-card">
+                            <div class="card-header">k=3 Results</div>
+                            <ul>
+                                <li>Vertices in densest subgraph: 32</li>
+                                <li>Number of edges: 992</li>
+                                <li>Number of k-cliques: 4960</li>
+                                <li>Execution time: 5,932,165 milliseconds</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Algorithm-4 Section -->
+            <div class="algorithm-container">
+                <h3 class="algorithm-title">Algorithm-4 (CoreExact) Results</h3>
+                
+                <!-- AS-733 Dataset for Algorithm-4 -->
+                <div class="dataset-container">
+                    <h3 class="dataset-title">AS-733 Dataset</h3>
+                    <p><em>Network with 1477 vertices and 6528 edges</em></p>
+
+                    <div class="algorithm-results">
+                        <!-- results -->
+                        <div class="result-card">
+                            <div class="card-header">Results</div>
+                            <ul>
+                                <li>Found 2530 cliques of size 3</li>
+                                <li>Number of (k-1)-cliques: 3142</li>
+                                <li>Vertices in densest subgraph: 29</li>
+                                <li>Number of edges: 477</li>
+                                <li>Number of k-cliques: 904</li>
+                                <li>Average k-cliques per vertex (Density): 31.1724</li>
+                                <li>Execution time: 13,702 milliseconds</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Netscience Dataset for Algorithm-4 -->
+                <div class="dataset-container">
+                    <h3 class="dataset-title">Netscience Dataset</h3>
+                    <p><em>Network with 1461 vertices and 2742 edges</em></p>
+
+                    <div class="algorithm-results">
+                        <!-- results -->
+                        <div class="result-card">
+                            <div class="card-header">Results</div>
+                            <ul>
+                                <li>Found 3764 cliques of size 3</li>
+                                <li>Number of (k-1)-cliques: 2742</li>
+                                <li>Vertices in densest subgraph: 20</li>
+                                <li>Number of edges: 190</li>
+                                <li>Number of k-cliques: 1140</li>
+                                <li>Average k-cliques per vertex (Density): 57</li>
+                                <li>Execution time: 9,152 milliseconds</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CA-HepTh Dataset for Algorithm-4 -->
+                <div class="dataset-container">
+                    <h3 class="dataset-title">CA-HepTh Dataset</h3>
+                    <p><em>Network with 9877 vertices and 51971 edges</em></p>
+
+                    <div class="algorithm-results">
+                        <!-- results -->
+                        <div class="result-card">
+                            <div class="card-header">Results</div>
+                            <ul>
+                                <li>Found 28339 cliques of size 3</li>
+                                <li>Number of (k-1)-cliques: 25973</li>
+                                <li>Vertices in densest subgraph: 32</li>
+                                <li>Number of edges: 992</li>
+                                <li>Number of k-cliques: 4960</li>
+                                <li>Average k-cliques per vertex (Density): 155</li>
+                                <li>Execution time: 857,559 milliseconds</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Section -->
+        <section id="comparison" class="section">
+            <h2 class="text-center">Algorithm Performance Comparison</h2>
+
+            <div class="comparison-charts">
+                <!-- Execution Time Comparison - Improved UI -->
+                <div class="chart-container">
+                    <h3>Execution Time Comparison (k=3)</h3>
+                    <p>Comparing the runtime (in milliseconds) between the two algorithms:</p>
+                    
+                    <div class="bar-chart">
+                        <!-- AS-733 Dataset Comparison -->
+                        <div class="dataset-group">
+                            <h4 class="dataset-chart-title">AS-733 Dataset</h4>
+                            <div class="bar-group">
+                                <div class="bar-label"><span class="algo-tag algo1-tag">Algo-1</span></div>
+                                <div class="bar-container">
+                                    <div class="bar bar-algo1" style="width: 100%;">
+                                        <span class="bar-value">14,096 ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar-label"><span class="algo-tag algo4-tag">Algo-4</span></div>
+                                <div class="bar-container">
+                                    <div class="bar bar-algo4" style="width: 97%;">
+                                        <span class="bar-value">13,702 ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="time-improvement">Time saving: 2.8%</div>
+                        </div>
+                        
+                        <!-- Netscience Dataset Comparison -->
+                        <div class="dataset-group">
+                            <h4 class="dataset-chart-title">Netscience Dataset</h4>
+                            <div class="bar-group">
+                                <div class="bar-label"><span class="algo-tag algo1-tag">Algo-1</span></div>
+                                <div class="bar-container">
+                                    <div class="bar bar-algo1" style="width: 100%;">
+                                        <span class="bar-value">9,695 ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar-label"><span class="algo-tag algo4-tag">Algo-4</span></div>
+                                <div class="bar-container">
+                                    <div class="bar bar-algo4" style="width: 94%;">
+                                        <span class="bar-value">9,152 ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="time-improvement">Time saving: 5.6%</div>
+                        </div>
+                        
+                        <!-- CA-HepTh Dataset Comparison -->
+                        <div class="dataset-group">
+                            <h4 class="dataset-chart-title">CA-HepTh Dataset</h4>
+                            <div class="bar-group">
+                                <div class="bar-label"><span class="algo-tag algo1-tag">Algo-1</span></div>
+                                <div class="bar-container">
+                                    <div class="bar bar-algo1" style="width: 100%;">
+                                        <span class="bar-value">5,932,165 ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar-label"><span class="algo-tag algo4-tag">Algo-4</span></div>
+                                <div class="bar-container">
+                                    <div class="bar bar-algo4" style="width: 14.5%;">
+                                        <span class="bar-value">857,559 ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="time-improvement">Time saving: 85.5% (6.9x faster)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Insight:</strong> Algorithm-4 (CoreExact) is significantly faster for larger datasets, particularly CA-HepTh where it's approximately 7 times faster than Algorithm-1, while maintaining identical solution quality.</p>
+                    </div>
+                </div>
+
+                <!-- Solution Quality Comparison -->
+                <div class="chart-container">
+                    <h3>Solution Quality Comparison (k=3)</h3>
+                    <p>Comparing the densest subgraph properties found by each algorithm:</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Dataset</th>
+                                <th>Algorithm</th>
+                                <th>Vertices</th>
+                                <th>Edges</th>
+                                <th>k-cliques</th>
+                                <th>Density</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="2">AS-733</td>
+                                <td><span class="algo-tag algo1-tag">Algo-1</span></td>
+                                <td>29</td>
+                                <td>477</td>
+                                <td>904</td>
+                                <td>31.17</td>
+                            </tr>
+                            <tr>
+                                <td><span class="algo-tag algo4-tag">Algo-4</span></td>
+                                <td>29</td>
+                                <td>477</td>
+                                <td>904</td>
+                                <td>31.17</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2">Netscience</td>
+                                <td><span class="algo-tag algo1-tag">Algo-1</span></td>
+                                <td>20</td>
+                                <td>190</td>
+                                <td>1140</td>
+                                <td>57.00</td>
+                            </tr>
+                            <tr>
+                                <td><span class="algo-tag algo4-tag">Algo-4</span></td>
+                                <td>20</td>
+                                <td>190</td>
+                                <td>1140</td>
+                                <td>57.00</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2">CA-HepTh</td>
+                                <td><span class="algo-tag algo1-tag">Algo-1</span></td>
+                                <td>32</td>
+                                <td>992</td>
+                                <td>4960</td>
+                                <td>155.00</td>
+                            </tr>
+                            <tr>
+                                <td><span class="algo-tag algo4-tag">Algo-4</span></td>
+                                <td>32</td>
+                                <td>992</td>
+                                <td>4960</td>
+                                <td>155.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Finding:</strong> Both algorithms find identical solutions in terms of quality across all datasets, demonstrating that Algorithm-4's efficiency doesn't come at the cost of solution accuracy.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container" style="margin-top: 30px;">
+                <h3>Overall Findings</h3>
+                <ul>
+                    <li><strong>Solution Quality:</strong> Both algorithms produce identical solution quality across all datasets.</li>
+                    <li><strong>Performance:</strong> Algorithm-4 (CoreExact) is more efficient, with execution times consistently lower than Algorithm-1.</li>
+                    <li><strong>Scalability:</strong> The performance gap becomes more significant as the dataset size increases.</li>
+                    <li><strong>Speedup:</strong> For CA-HepTh, the largest dataset, Algorithm-4 runs approximately 7 times faster than Algorithm-1.</li>
+                    <li><strong>Subgraph Properties:</strong> The densest subgraphs found contain a high concentration of k-cliques relative to their size.</li>
+                </ul>
+                
+                <p>These results demonstrate that Algorithm-4 (CoreExact) is the preferred choice for large-scale network analysis, as it maintains solution quality while significantly reducing computational time. This performance advantage becomes increasingly important as the size of the analyzed networks grows.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Dense Subgraph Algorithm Analysis</p>
+            <p><small>© 2025 Network Analysis Research</small></p>
+        </div>
+    </footer>
+</body>
+</html>
